@@ -1,3 +1,3 @@
-import {crawler} from "./crawler";
+import { crawler } from "./crawler";
 
 console.log(crawler(23));

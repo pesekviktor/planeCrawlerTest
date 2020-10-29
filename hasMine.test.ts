@@ -1,8 +1,7 @@
-import {crawler} from "./crawler";
+import { crawler } from "./crawler";
 
-
-describe('Test crawler', () => {
-    it('should give correct result', () => {
-        crawler(3);
-    })
+describe("Test crawler", () => {
+	it("should give correct result", () => {
+		crawler(3);
+	});
 });
