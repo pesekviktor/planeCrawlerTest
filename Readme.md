@@ -1,6 +1,6 @@
 #Robot test
 Robot crawls on 2D plane only horizontal and vertical moves allowed. 
-Can not step on the fields where sum of digits is higher or equal than 23.
+Can not step on the fields where sum of digits is higher or equal than 23 (use abs() for negative numbers.
 Run `yarn install` and `yarn run` to run the program.
 
 #Implementation
