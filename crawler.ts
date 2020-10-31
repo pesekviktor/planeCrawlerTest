@@ -1,5 +1,3 @@
-import { getHasMine } from "./hasMine";
-
 enum Direction {
 	UP = "UP",
 	RIGHT = "RIGHT",
@@ -33,20 +31,8 @@ class History {
 		return this._store;
 	}
 
-	findLast(direction: Direction) {
-		for (let i = this._store.length - 1; i >= 0; i--) {
-			if (this._store[i].direction === direction) {
-				return this._store[i];
-			}
-		}
-	}
-
 	getFirstUntraced() {
 		return this.getStore()[this.lastTracedIndex];
-	}
-
-	removeFirst() {
-		this._store.shift();
 	}
 
 	nextUntraced() {
@@ -54,15 +40,13 @@ class History {
 	}
 }
 
-export const crawler = (
-	maxSum: number,
-	fieldAddListener?: (field: Partial<HistoryItem>) => any
-): number => {
-	const hasMine = getHasMine(maxSum);
-
+export const getCrawler = (
+	hasMineFunction: (x: number, y: number) => boolean
+) => (fieldAddListener?: (field: Partial<HistoryItem>) => any): number => {
 	let x = 0,
 		y = 0,
 		sumOfFields = 0;
+	let borderFields = 0;
 	const history = new History();
 	let traceBackDirection;
 
@@ -83,9 +67,12 @@ export const crawler = (
 			lastMove.xEnd = historyItem.xEnd;
 		}
 		traceBackDirection = undefined;
+		if (historyItem.xEnd === 0 || historyItem.yEnd === 0) {
+			borderFields++;
+		}
 	};
 
-	const blocked = (x, y): boolean => {
+	const historyBlock = (x, y): boolean => {
 		return history.getStore().some((item) => {
 			if (
 				item.direction === Direction.UP &&
@@ -124,38 +111,9 @@ export const crawler = (
 		});
 	};
 
-	const historyBlock = (x, y, moveDirection: Direction) => {
-		switch (moveDirection) {
-			case Direction.DOWN:
-				return (
-					(history.getLast() &&
-						history.getLast().direction === Direction.UP) ||
-					blocked(x, y)
-				);
-			case Direction.LEFT:
-				return (
-					(history.getLast() &&
-						history.getLast().direction === Direction.RIGHT) ||
-					blocked(x, y)
-				);
-			case Direction.UP:
-				return (
-					(history.getLast() &&
-						history.getLast().direction === Direction.DOWN) ||
-					blocked(x, y)
-				);
-			case Direction.RIGHT:
-				return (
-					(history.getLast() &&
-						history.getLast().direction === Direction.LEFT) ||
-					blocked(x, y)
-				);
-		}
-	};
-
-	const isBlocked = (x, y, moveDirection: Direction) => {
-		const blockedByContraints = x < 0 || y < 0 || hasMine(x, y);
-		return blockedByContraints || historyBlock(x, y, moveDirection);
+	const isBlocked = (x, y) => {
+		const blockedByConstraint = x < 0 || y < 0 || hasMineFunction(x, y);
+		return blockedByConstraint || historyBlock(x, y);
 	};
 
 	pushNewMoveToStack({
@@ -168,7 +126,7 @@ export const crawler = (
 
 	while (true) {
 		//DOWN
-		if (!isBlocked(x, y - 1, Direction.DOWN)) {
+		if (!isBlocked(x, y - 1)) {
 			pushNewMoveToStack({
 				xEnd: x,
 				xStart: x,
@@ -180,7 +138,7 @@ export const crawler = (
 			continue;
 		}
 		//LEFT
-		if (!isBlocked(x - 1, y, Direction.LEFT)) {
+		if (!isBlocked(x - 1, y)) {
 			pushNewMoveToStack({
 				xEnd: x - 1,
 				xStart: x - 1,
@@ -192,7 +150,7 @@ export const crawler = (
 			continue;
 		}
 		//UP
-		if (!isBlocked(x, y + 1, Direction.UP)) {
+		if (!isBlocked(x, y + 1)) {
 			pushNewMoveToStack({
 				xEnd: x,
 				xStart: x,
@@ -204,7 +162,7 @@ export const crawler = (
 			continue;
 		}
 		//RIGHT
-		if (!isBlocked(x + 1, y, Direction.RIGHT)) {
+		if (!isBlocked(x + 1, y)) {
 			pushNewMoveToStack({
 				xEnd: x + 1,
 				xStart: x + 1,
@@ -257,5 +215,11 @@ export const crawler = (
 		break;
 	}
 
-	return sumOfFields * 4;
+	let result = sumOfFields * 4;
+
+	//Subtract for border points where x or y = 0
+	result = result - 2 * borderFields;
+	//Subtract one extra for 0:0 point, which is in all planes
+	result = result - 1;
+	return result;
 };

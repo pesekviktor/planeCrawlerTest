@@ -1,7 +1,10 @@
 import { crawler } from "./crawler";
+import { getHasMine } from "./hasMine";
 
-describe("Test crawler", () => {
+describe("Test has mine", () => {
 	it("should give correct result", () => {
-		crawler(3);
+		expect(getHasMine(23)(55, 55)).toBe(false);
+		expect(getHasMine(23)(55, 553)).toBe(false);
+		expect(getHasMine(23)(55, 554)).toBe(true);
 	});
 });

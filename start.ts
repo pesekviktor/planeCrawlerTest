@@ -1,3 +1,5 @@
-import { crawler } from "./crawler";
+import { getCrawler } from "./crawler";
+import { getHasMine } from "./hasMine";
 
-console.log(crawler(23));
+let crawler = getCrawler(getHasMine(23));
+console.log(crawler());
